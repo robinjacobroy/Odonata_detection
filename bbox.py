@@ -20,7 +20,8 @@ for fln in sorted(os.listdir(input_dir)):
     im_ext=fln.rpartition(".")[-1]
     fname=fln.replace(im_ext,'') 
     
-    print(fln.rpartition(".")[-3])   
+    if fln.endswith(".txt"):
+        continue
     im=cv2.imread(os.path.join(input_dir,fln))
     cv2.namedWindow(fname, cv2.WINDOW_NORMAL)
     cv2.setWindowProperty(fname, cv2.WND_PROP_FULLSCREEN,
@@ -35,7 +36,7 @@ for fln in sorted(os.listdir(input_dir)):
         
         
     for i in range(0,len(r)):
-        with open(os.path.join(out_dir,fln.replace(im_ext,'txt')), "a") as boxfile:
+        with open(os.path.join(input_dir,fln.replace(im_ext,'txt')), "a") as boxfile:
             writer = csv.writer(boxfile)
             center_x=(r[i][0]+(r[i][2]/2))/im.shape[1]
             center_y=(r[i][1]+(r[i][3]/2))/im.shape[0]
