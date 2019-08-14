@@ -1,4 +1,6 @@
 import os,shutil,csv,cv2
+import numpy as np
+import imutils
 
 def rectangle(fpath):   
     img=cv2.imread(fpath)
