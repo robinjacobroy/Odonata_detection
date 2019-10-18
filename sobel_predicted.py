@@ -49,12 +49,7 @@ for fln in sorted(os.listdir(input_dir)):
 
       #crop image
       im_crop=im[start_y:end_y,start_x:end_x].copy()
-      im[start_y:end_y,start_x:end_x]=[255,0,255]
-      im[np.where((im!=[255,0,255]).all(axis=2))]= [255,255,255]
-      im[np.where((im==[255,0,255]).all(axis=2))]= [0,0,0]
-      im[np.where((im!=[0,0,0]).all(axis=2))]= [255,255,255]
-      im=np.invert(im)
-      #masked=cv2.bitwise_and(img,im)
+      
     
       ddepth = cv2.CV_16S
     
@@ -67,32 +62,31 @@ for fln in sorted(os.listdir(input_dir)):
       grad_y = cv2.Scharr(gray,ddepth,0,1)
       #grad_y = cv2.Sobel(gray, ddepth, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
     
-    
       abs_grad_x = cv2.convertScaleAbs(grad_x)
       abs_grad_y = cv2.convertScaleAbs(grad_y)
       grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
     
+      #thresholding the region inside the bounding box
       threshMap = cv2.threshold(grad \
                                 , 0, 255,cv2.THRESH_BINARY|cv2.THRESH_OTSU)[1]
-    
-    
       kernel=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(15,15))
       kernel1=np.ones((15,15),np.uint8)
       kernel2=np.ones((3,3),np.uint8)
+      #morphological operations to make the object mask
       dilated=cv2.dilate(threshMap,kernel1,iterations=2)
-    
       closing = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel1)
       eroded=cv2.erode(closing,kernel2,iterations=3)
+      #draw the biggest contour, which could be the object
       _,contours,_=cv2.findContours(eroded,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-      drawing=np.zeros(dilated.shape,np.uint8)
+      drawing=np.ones(dilated.shape,np.uint8)*255
+      drawing=cv2.cvtColor(drawing,cv2.COLOR_GRAY2BGR)
       c=max(contours,key=cv2.contourArea)
-      cv2.drawContours(drawing,[c],0,255,-1)
-      final=cv2.bitwise_and(im_crop,im_crop,mask=np.invert(drawing))
-      #cv2.namedWindow("hi",cv2.WINDOW_NORMAL)
-      #cv2.imshow("hi",drawing)
-      #cv2.waitKey(0)
-      #cv2.destroyAllWindows()    
-      #output=cv2.hconcat([im_crop,final])
+      cv2.drawContours(drawing,[c],0,(0,0,0),-1)
+      
+      final=cv2.bitwise_and(im_crop,drawing)
+      final[np.where((final==[0,0,0]).all(axis=2))]= [255,0,255] 
+      #output=cv2.hconcat([im_crop,final]) 
+      #paste the masked region inside the cutout to the original image
       orig=Image.fromarray(img)
       cropped=Image.fromarray(final)
       orig.paste(cropped,(start_x,start_y))
