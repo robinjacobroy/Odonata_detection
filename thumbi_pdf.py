@@ -20,5 +20,5 @@ for i in range(len(df)):
         im=Image.fromarray(img)
         im_list.append(im)
         
-im.save("/home/robin/thumbi_out/try.pdf", "PDF" ,\
-        resolution=100.0, save_all=True, append_images=im_list)
+im_list[0].save("/home/robin/thumbi_out/try.pdf", "PDF" ,\
+        resolution=100.0, save_all=True, append_images=im_list[1:])
