@@ -27,7 +27,7 @@ for fln in sorted(os.listdir(input_dir)):
             
         x=np.array(r[i])
         imCrop = im[int(x[1]):int(x[1]+x[3]), int(x[0]):int(x[0]+x[2])] 
-        name1=fln.replace(".jpg",str(i)) 
+        name1=fln.replace(".jpg",str(i)+".jpg") 
         
-        cv2.imwrite(os.path.join(out_dir,fln), imCrop)
+        cv2.imwrite(os.path.join(out_dir,name1), imCrop)
    
